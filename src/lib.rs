@@ -779,8 +779,6 @@ impl Div<LongInt> for LongInt {
     }
 }
 
-fn main() {}
-
 #[cfg(test)]
 mod tests {
     use crate::LongInt;
@@ -1490,14 +1488,6 @@ mod tests {
             c.getHex(),
             "a78865c13b14ae4e25e90771b54963ee2d68c0a64d4a8ba7c6f45ee0e9daa65b"
         );
-
-        let c = b + a;
-        assert_eq!(
-            c.getHex(),
-            "a78865c13b14ae4e25e90771b54963ee2d68c0a64d4a8ba7c6f45ee0e9daa65b"
-        );
-
-        let a = LongInt::from_blocks_big_endian(vec![]);
 
         let a =
             LongInt::from_hex("36f028580bb02cc8272a9a020f4200e346e276ae664e45ee80745574e2f5ab80");
