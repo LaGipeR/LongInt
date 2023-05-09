@@ -2,7 +2,7 @@ use std::cmp::{max, Ordering};
 use std::ops::{Add, BitAnd, BitOr, BitXor, Div, Mul, Not, Rem, Shl, Shr, Sub};
 
 #[derive(Clone)]
-struct LongInt {
+pub struct LongInt {
     blocks: Vec<u32>,
 }
 
