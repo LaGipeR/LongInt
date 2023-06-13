@@ -1,4 +1,5 @@
 use std::cmp::{max, Ordering};
+use std::mem::swap;
 use std::ops::{Add, BitAnd, BitOr, BitXor, Div, Mul, Not, Rem, Shl, Shr, Sub};
 
 #[derive(Clone)]
@@ -139,6 +140,21 @@ impl LongInt {
         } else {
             res
         };
+    }
+
+    pub fn gcd(&self, other: &LongInt) -> LongInt {
+        let zero = LongInt::new();
+        let mut a = self.clone();
+        let mut b = other.clone();
+
+        let (mut less_ref, mut greater_ref) = if &a < &b { (&mut a, &mut b) } else { (&mut b, &mut a) };
+
+        while less_ref != &zero {
+            *greater_ref = &*greater_ref % &*less_ref;
+            swap(&mut less_ref, &mut greater_ref);
+        }
+
+        greater_ref.clone()
     }
 }
 
@@ -2149,5 +2165,53 @@ mod tests {
         let module = LongInt::from_hex("bcd138956163cdea9411590671de");
         let c = LongInt::pow(&a, &b, &module);
         assert_eq!(c.getHex(), "553feeecaceb3c9f86e1349e945e");
+    }
+
+    #[test]
+    fn test_gcd() {
+        let a = LongInt::from_blocks_big_endian(vec![13]);
+        let b = LongInt::from_blocks_big_endian(vec![5]);
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "1");
+
+        let a = LongInt::from_blocks_big_endian(vec![15]);
+        let b = LongInt::from_blocks_big_endian(vec![5]);
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "5");
+
+        let a = LongInt::from_blocks_big_endian(vec![5]);
+        let b = LongInt::from_blocks_big_endian(vec![5]);
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "5");
+
+        let a = LongInt::from_blocks_big_endian(vec![15]);
+        let b = LongInt::from_blocks_big_endian(vec![25]);
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "5");
+
+        let a = LongInt::from_blocks_big_endian(vec![12856]);
+        let b = LongInt::from_blocks_big_endian(vec![700536]);
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "8");
+
+        let a = LongInt::from_hex("1bd1529ff21abcd1359");
+        let b = LongInt::from_hex("1bd1529ff21abcd1359");
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "1bd1529ff21abcd1359");
+
+        let a = LongInt::new();
+        let b = LongInt::from_hex("215bd0157cde81205d17f1ae61605de");
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "215bd0157cde81205d17f1ae61605de");
+
+        let a = LongInt::from_hex("215bd0157cde81205d17f1ae61605df");
+        let b = LongInt::from_hex("215bd0157cde81205d17f1ae61605de");
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "1");
+
+        let a = LongInt::from_hex("1");
+        let b = LongInt::from_hex("215bd0157cde81205d17f1ae61605de");
+        let c = LongInt::gcd(&a, &b);
+        assert_eq!(c.getHex(), "1");
     }
 }
