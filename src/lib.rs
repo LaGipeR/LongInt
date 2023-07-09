@@ -156,6 +156,37 @@ impl LongInt {
 
         greater_ref.clone()
     }
+
+    pub fn inv(&self, module: &LongInt) -> Option<LongInt> {
+        let zero = LongInt::new();
+        let mut x = LongInt::new();
+        let mut y = LongInt::from_hex("1");
+        let mut u = LongInt::from_hex("1");
+        let mut v = LongInt::new();
+
+        let mut a = self.clone();
+        let mut b = module.clone();
+
+        while &a != &zero {
+            let q = &b / &a;
+            let r = &b % &a;
+            let m = (&x + (module - (&u * &q) % module)) % module;
+            let n = (&y + (module - (&v * &q) % module)) % module;
+
+            b = a;
+            a = r;
+            x = u;
+            y = v;
+            u = m;
+            v = n;
+        }
+
+        return if b == LongInt::from_hex("1") {
+            Some(x % module)
+        } else {
+            None
+        }
+    }
 }
 
 impl Not for &LongInt {
@@ -2213,5 +2244,53 @@ mod tests {
         let b = LongInt::from_hex("215bd0157cde81205d17f1ae61605de");
         let c = LongInt::gcd(&a, &b);
         assert_eq!(c.getHex(), "1");
+    }
+    #[test]
+    fn test_inv() {
+        let module = LongInt::from_blocks_big_endian(vec![10]);
+        let a = LongInt::from_blocks_big_endian(vec![3]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = LongInt::from_blocks_big_endian(vec![10]);
+        let a = LongInt::from_blocks_big_endian(vec![7]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = LongInt::from_blocks_big_endian(vec![10]);
+        let a = LongInt::from_blocks_big_endian(vec![1]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = LongInt::from_blocks_big_endian(vec![17]);
+        let a = LongInt::from_blocks_big_endian(vec![91]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = LongInt::from_blocks_big_endian(vec![17]);
+        let a = LongInt::from_blocks_big_endian(vec![14]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = LongInt::from_blocks_big_endian(vec![17]);
+        let a = LongInt::from_blocks_big_endian(vec![9]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = (LongInt::from_blocks_big_endian(vec![141]) << 141) + LongInt::from_hex("1");
+        let a = LongInt::from_blocks_big_endian(vec![9]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = (LongInt::from_blocks_big_endian(vec![141]) << 141) + LongInt::from_hex("1");
+        let a = LongInt::from_blocks_big_endian(vec![9]);
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
+
+        let module = (LongInt::from_blocks_big_endian(vec![141]) << 141) + LongInt::from_hex("1");
+        let a = LongInt::from_blocks_big_endian(vec![9]);
+        let a = a.inv(&module).unwrap();
+        let inv_a = a.inv(&module).unwrap();
+        assert_eq!(((a * inv_a) % module).getHex(), "1");
     }
 }
